@@ -20,7 +20,15 @@ class UserTableSeeder extends Seeder
             'email_verified_at' => now(),
             'password' => bcrypt('admin'),
             'role_id' => 1,
-            'remember_token' => Str::random(10)
+            'remember_token' => Str::random(10),
+        ]);
+        User::create([
+            'name' => 'User',
+            'email' => 'user@example.com',
+            'email_verified_at' => now(),
+            'password' => bcrypt('user'),
+            'role_id' => 2,
+            'remember_token' => Str::random(10),
         ]);
     }
 }
