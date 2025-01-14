@@ -83,6 +83,20 @@
                     </ul>
                 </li>
 
+                <li class="sidebar-item has-sub {{ Request::is('asset.index*') ? 'active' : '' }}">
+                    <a href="#" class='sidebar-link'>
+                        {{-- <i class="bi bi-card-checklist"></i> --}}
+                        <i class="bi bi-folder"></i>
+                        <span>Aset</span>
+                    </a>
+
+                    <ul class="submenu">
+                        <li class="submenu-item {{ Request::routeIs('asset.index') ? 'active' : '' }}">
+                            <a href="{{ route('asset.index') }}" class="submenu-link">Daftar Aset</a>
+                        </li>
+                    </ul>
+                </li>
+
                 <li class="sidebar-item has-sub {{ Request::is('add-users*') ? 'active' : '' }}">
                     <a href="#" class='sidebar-link'>
                         <i class="bi bi-card-checklist"></i>

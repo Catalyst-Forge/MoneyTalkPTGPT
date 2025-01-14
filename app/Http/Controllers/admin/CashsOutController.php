@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Models\CashOut;
 use App\Models\Cash;
 use App\Models\Category;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Maatwebsite\Excel\Facades\Excel;
 
 class CashsOutController extends Controller
@@ -72,9 +73,17 @@ class CashsOutController extends Controller
         return redirect()->route('cashs-out.index')->with('success', 'Cash out entry deleted successfully.');
     }
 
-    public function export()
+    public function exportExcel()
     {
         return Excel::download(new CashsOutExport, 'cashout_entries.xlsx');
+    }
+
+    public function exportPDF()
+    {
+        $cashs_out = CashOut::all();
+        $totalBalanceCashOut = CashOut::sum('amount');
+        $pdf = Pdf::loadView('admin.cashs-out.pdf', compact('cashs_out', 'totalBalanceCashOut'));
+        return $pdf->download('laporan_kas_keluar.pdf');
     }
 
     public function monthlyReport(Request $request)

@@ -18,7 +18,7 @@ class UserTableSeeder extends Seeder
             'name' => 'Admin',
             'email' => 'admin@example.com',
             'email_verified_at' => now(),
-            'password' => bcrypt('password'),
+            'password' => bcrypt('admin'),
             'role_id' => 1,
             'remember_token' => Str::random(10)
         ]);

@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Models\Cash;
 use App\Models\CashOut;
 use App\Models\Category;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Maatwebsite\Excel\Facades\Excel;
 
 class CashsController extends Controller
@@ -20,7 +21,7 @@ class CashsController extends Controller
         $cashs = Cash::with('category')->get();
         $categories = Category::all();
         $totalBalance = Cash::sum('amount') - CashOut::sum('amount');
-        $totalBalanceCashIn = CashOut::sum('amount');
+        $totalBalanceCashIn = Cash::sum('amount');
         return view('admin.cashs.index', compact('cashs', 'categories', 'totalBalance', 'totalBalanceCashIn'));
     }
 
@@ -72,9 +73,17 @@ class CashsController extends Controller
         return redirect()->route('cashs.index')->with('success', 'Cash entry deleted successfully.');
     }
 
-    public function export()
+    public function exportExcel()
     {
         return Excel::download(new CashsExport, 'cash_entries.xlsx');
+    }
+
+    public function exportPDF()
+    {
+        $cashs = Cash::all();
+        $totalBalanceCashIn = Cash::sum('amount');
+        $pdf = Pdf::loadView('admin.cashs.pdf', compact('cashs', 'totalBalanceCashIn'));
+        return $pdf->download('laporan_kas_masuk.pdf');
     }
 
     public function monthlyReport(Request $request)

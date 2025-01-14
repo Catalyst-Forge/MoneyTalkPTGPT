@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\admin\AddUsersController;
 use App\Http\Controllers\admin\AdminController;
+use App\Http\Controllers\admin\AssetsController;
 use App\Http\Controllers\Admin\CashsController;
 use App\Http\Controllers\admin\CashsOutController;
 use App\Http\Controllers\Admin\CategoriesController;
@@ -46,8 +47,15 @@ Route::middleware(['auth', 'role.admin'])->group(function () {
         'update' => 'cashs-out.update',
         'destroy' => 'cashs-out.destroy',
     ]);
-    Route::get('cashs/export', [CashsController::class, 'export'])->name('cashs.export');
-    Route::get('cashsout/export', [CashsOutController::class, 'export'])->name('cashsout.export');
+    Route::get('cashs/export-excel', [CashsController::class, 'exportExcel'])->name('cashs.exportExcel');
+    Route::get('cashs/export-pdf', [CashsController::class, 'exportPDF'])->name('cashs.exportPdf');
+    Route::get('cashsout/export-excel', [CashsOutController::class, 'exportExcel'])->name('cashsout.exportExcel');
+    Route::get('cashsout/export-pdf', [CashsOutController::class, 'exportPDF'])->name('cashsout.exportPdf');
+
+    Route::resource('asset', AssetsController::class)->except(['create', 'show', 'edit']);
+    Route::get('asset/export-excel', [AssetsController::class, 'exportExcel'])->name('asset.exportExcel');
+    Route::get('asset/export-pdf', [AssetsController::class, 'exportPDF'])->name('asset.exportPdf');
+    Route::get('asset/monthly-report', [AssetsController::class, 'monthlyReport'])->name('asset.monthlyReport');
 
     Route::get('/profile', [ProfileUpdateController::class, 'index'])->name('profile.index');
     Route::put('/profile/update', [ProfileUpdateController::class, 'update'])->name('profile.update');
