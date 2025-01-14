@@ -24,14 +24,14 @@
                 </div>
               @endif
 
-              {{-- <form action="{{ route('asset.monthlyReport') }}" method="GET" id="monthlyReportForm">
+              <form action="{{ route('asset.monthlyReport') }}" method="GET" id="monthlyReportForm">
                 <div class="d-flex align-items-center gap-3">
                   <input type="month" name="month" id="month" class="form-control w-auto"
                     value="{{ request('month') }}">
 
                   <button type="submit" class="btn btn-primary">Tampilkan</button>
                 </div>
-              </form> --}}
+              </form>
             </div>
           </div>
         </div>

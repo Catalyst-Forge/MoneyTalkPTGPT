@@ -113,7 +113,7 @@ class AssetsController extends Controller
 
     public function exportExcel()
     {
-        return Excel::download(new AssetsExport, 'data_asset.xlsx');
+        return Excel::download(new AssetsExport(), 'data_asset.xlsx');
     }
 
     public function exportPDF()
@@ -124,8 +124,26 @@ class AssetsController extends Controller
         return $pdf->download('laporan_asset.pdf');
     }
 
-    public function monthlyReport()
+    public function monthlyReport(Request $request)
     {
-        //
+        $month = $request->input('month');
+
+        if ($month) {
+            $assets = Assets::with('category')
+                ->whereMonth('date', '=', \Carbon\Carbon::parse($month)->month)
+                ->whereYear('date', '=', \Carbon\Carbon::parse($month)->year)
+                ->get();
+
+            $totalAmount = $assets->sum('amount');
+        } else {
+            $assets = collect();
+            $totalAmount = 0;
+        }
+
+        return view('admin.assets.monthly_report', compact('assets', 'month', 'totalAmount'));
+    }
+
+    public function diagram() {
+        
     }
 }

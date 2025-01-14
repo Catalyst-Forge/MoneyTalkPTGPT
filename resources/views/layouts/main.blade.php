@@ -67,9 +67,6 @@
         }
     </style> --}}
     <style>
-        *{
-            border-radius: 0!important;
-        }
         .sidebar-wrapper{
             background-color: #bfdcd6;
         }
