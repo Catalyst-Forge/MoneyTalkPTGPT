@@ -32,14 +32,29 @@
     </div>
   </div>
 
+  <div class="row mt-4">
+    <div class="col-md-12 mb-3">
+      <div class="d-flex align-items-center">
+        <label for="yearFilter" class="me-2">Pilih Tahun:</label>
+        <select id="yearFilter" class="form-select" style="width: auto;">
+          @foreach($availableYears as $year)
+            <option value="{{ $year }}" {{ $year == $selectedYear ? 'selected' : '' }}>
+              {{ $year }}
+            </option>
+          @endforeach
+        </select>
+      </div>
+    </div>
+  </div>
+
   <div class="row">
     <div class="col-md-6">
-      <h2>Kas masuk</h2>
+      <h2>Kas Masuk per Bulan</h2>
       <div id="cashInChart"></div>
     </div>
 
     <div class="col-md-6">
-      <h2>Kas keluar</h2>
+      <h2>Kas Keluar per Bulan</h2>
       <div id="cashOutChart"></div>
     </div>
   </div>
@@ -53,14 +68,13 @@
 
   <div class="row mt-4">
     <div class="col-md-6">
-      <h2>Kategori kas masuk</h2>
+      <h2>Kategori Kas Masuk</h2>
       <div id="cashInCategoryChart"></div>
     </div>
 
     <div class="col-md-6">
-      <h2>Kategori kas keluar
-        <div id="cashOutCategoryChart"></div>
-      </h2>
+      <h2>Kategori Kas Keluar</h2>
+      <div id="cashOutCategoryChart"></div>
     </div>
   </div>
 
@@ -72,6 +86,27 @@
     var assetData = {!! json_encode($assetData) !!};
     var cashInCategoryData = {!! json_encode($cashInCategoryData) !!};
     var cashOutCategoryData = {!! json_encode($cashOutCategoryData) !!};
+    var selectedYear = {!! json_encode($selectedYear) !!};
+
+    // Event listener untuk filter tahun
+    document.getElementById('yearFilter').addEventListener('change', function() {
+      const year = this.value;
+      window.location.href = `?year=${year}`;
+    });
+
+
+    // Fungsi format Rupiah
+    function formatRupiah(value) {
+      return 'Rp ' + new Intl.NumberFormat('id-ID').format(value);
+    }
+
+    // Fungsi untuk format tanggal bulan
+    function formatMonth(date) {
+      return new Date(date).toLocaleDateString('id-ID', {
+        month: 'long',
+        year: 'numeric'
+      });
+    }
 
     // Fungsi untuk merender diagram
     function renderChart(selector, options) {
@@ -83,84 +118,168 @@
       }
     }
 
-    // Kas Masuk
-    renderChart("#cashInChart", {
+    // Konfigurasi umum untuk bar chart
+    const barChartConfig = {
       chart: {
-        type: "bar",
-        height: 400
+        type: 'bar',
+        height: 400,
+        toolbar: {
+          show: false
+        }
       },
+      dataLabels: {
+        enabled: false
+      },
+      tooltip: {
+        y: {
+          formatter: formatRupiah
+        }
+      },
+      grid: {
+        borderColor: '#f1f1f1'
+      },
+      xaxis: {
+        labels: {
+          rotate: -45,
+          style: {
+            fontSize: '12px'
+          }
+        }
+      },
+      yaxis: {
+        labels: {
+          formatter: function(value) {
+            return formatRupiah(value);
+          }
+        }
+      }
+    };
+
+    // Konfigurasi umum untuk pie chart
+    const categoryBarConfig = {
+      chart: {
+        type: 'bar',
+        height: 400,
+        toolbar: {
+          show: false
+        }
+      },
+      plotOptions: {
+        bar: {
+          horizontal: true,
+          dataLabels: {
+            position: 'top',
+          },
+        }
+      },
+      dataLabels: {
+        enabled: true,
+        formatter: function(val) {
+          return formatRupiah(val);
+        },
+        style: {
+          fontSize: '12px',
+        }
+      },
+      tooltip: {
+        y: {
+          formatter: formatRupiah
+        }
+      },
+      grid: {
+        borderColor: '#f1f1f1'
+      },
+      xaxis: {
+        labels: {
+          formatter: function(val) {
+            return formatRupiah(val);
+          }
+        }
+      },
+      yaxis: {
+        labels: {
+          style: {
+            fontSize: '12px'
+          }
+        }
+      }
+    };
+    // Konfigurasi umum untuk monthly bar chart
+    const monthlyBarConfig = {
+      ...barChartConfig,
+      title: {
+        text: `Tahun ${selectedYear}`,
+        align: 'right',
+        style: {
+          fontSize: '14px',
+          color: '#666'
+        }
+      }
+    };
+
+    // Render charts
+    renderChart("#cashInChart", {
+      ...monthlyBarConfig,
       series: [{
-        name: "Total",
+        name: 'Kas Masuk',
         data: Object.values(cashInData)
       }],
       xaxis: {
-        categories: Object.keys(cashInData)
+        ...monthlyBarConfig.xaxis,
+        categories: Object.keys(cashInData).map(formatMonth)
       },
-      title: {
-        text: "Kas Masuk per Tanggal"
-      },
+      colors: ['#00E396']
     });
 
-    // Kas Keluar
     renderChart("#cashOutChart", {
-      chart: {
-        type: "bar",
-        height: 400
-      },
+      ...monthlyBarConfig,
       series: [{
-        name: "Total",
+        name: 'Kas Keluar',
         data: Object.values(cashOutData)
       }],
       xaxis: {
-        categories: Object.keys(cashOutData)
+        ...monthlyBarConfig.xaxis,
+        categories: Object.keys(cashOutData).map(formatMonth)
       },
-      title: {
-        text: "Kas Keluar per Tanggal"
-      },
+      colors: ['#FF4560']
     });
 
-    // Data Aset
     renderChart("#assetChart", {
-      chart: {
-        type: "bar",
-        height: 400
-      },
+      ...barChartConfig,
       series: [{
-        name: "Total",
-        data: assetData.map(a => a.total)
+        name: 'Total',
+        data: assetData.map(item => item.total)
       }],
       xaxis: {
-        categories: assetData.map(a => a.name)
-      },
-      title: {
-        text: "Total Aset Berdasarkan Nama"
-      },
+        ...barChartConfig.xaxis,
+        categories: assetData.map(item => item.name)
+      }
     });
 
-    // Kategori Kas Masuk
     renderChart("#cashInCategoryChart", {
-      chart: {
-        type: "pie",
-        height: 400
+      ...categoryBarConfig,
+      series: [{
+        name: 'Total',
+        data: Object.values(cashInCategoryData)
+      }],
+      xaxis: {
+        ...categoryBarConfig.xaxis,
+        categories: Object.keys(cashInCategoryData)
       },
-      series: Object.values(cashInCategoryData),
-      labels: Object.keys(cashInCategoryData),
-      title: {
-        text: "Kategori Kas Masuk"
-      },
+      colors: ['#00E396']
     });
 
-    // Kategori Kas Keluar
     renderChart("#cashOutCategoryChart", {
-      chart: {
-        type: "pie",
-        height: 400
+      ...categoryBarConfig,
+      series: [{
+        name: 'Total',
+        data: Object.values(cashOutCategoryData)
+      }],
+      xaxis: {
+        ...categoryBarConfig.xaxis,
+        categories: Object.keys(cashOutCategoryData)
       },
-      series: Object.values(cashOutCategoryData),
-      labels: Object.keys(cashOutCategoryData),
-      title: {
-        text: "Kategori Kas Keluar"
-      },
+      colors: ['#FF4560']
     });
   </script>
 @endsection

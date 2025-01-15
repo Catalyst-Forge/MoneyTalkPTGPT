@@ -24,7 +24,7 @@ class CashOutTableSeeder extends Seeder
         // Sample Cash Out
         $cashOutDescriptions = ['Pembayaran Listrik', 'Pembayaran Air', 'Gaji Karyawan', 'Pembelian ATK', 'Biaya Marketing', 'Biaya Transportasi', 'Biaya Internet', 'Pembayaran Pajak', 'Biaya Maintenance', 'Biaya Sewa', 'Lain-lainnya'];
 
-        for ($i = 0; $i < 200; $i++) {
+        for ($i = 0; $i < 50; $i++) {
             $date = Carbon::parse($startDate)->addDays(rand(0, $endDate->diffInDays($startDate)));
             CashOut::create([
                 'date' => $date,

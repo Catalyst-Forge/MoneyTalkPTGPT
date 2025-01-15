@@ -22,7 +22,7 @@ return new class extends Migration
             $table->decimal('value', 15, 2);
             $table->decimal('total', 15, 2)->default(0);
             $table->timestamps();
-            
+
             $table->foreign('cash_out_id')->references('id')->on('cash_outs')->onDelete('set null');
             $table->foreign('cash_in_id')->references('id')->on('cashs')->onDelete('set null');
             $table->foreign('category_id')->references('id')->on('categories')->onDelete('set null');

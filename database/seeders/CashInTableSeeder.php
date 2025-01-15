@@ -23,7 +23,7 @@ class CashInTableSeeder extends Seeder
         // Sample Cash In
         $cashInDescriptions = ['Pendapatan Penjualan', 'Pendapatan Jasa', 'Bunga Bank', 'Pendapatan Sewa', 'Komisi Penjualan', 'Pendapatan Investasi', 'Penjualan Aset', 'Lain-lainnya'];
 
-        for ($i = 0; $i < 200; $i++) {
+        for ($i = 0; $i < 50; $i++) {
             $date = Carbon::parse($startDate)->addDays(rand(0, $endDate->diffInDays($startDate)));
             Cash::create([
                 'date' => $date,

@@ -7,7 +7,7 @@
                 </a>
             </div>
             <div class="sidebar-toggler  x">
-                <a href="#" class="sidebar-hide d-xl-none d-block"><i class="bi bi-x bi-middle"></i></a>
+                <a class="sidebar-hide d-xl-none d-block"><i class="bi bi-x bi-middle"></i></a>
             </div>
         </div>
     </div>
@@ -24,7 +24,7 @@
 
             @if (auth()->user()->role->name == 'admin')
                 <li class="sidebar-item has-sub {{ Request::is('cashs.index*') ? 'active' : '' }}">
-                    <a href="#" class='sidebar-link'>
+                    <a class='sidebar-link'>
                         <i class="bi bi-cash"></i>
                         <span>Kas</span>
                     </a>
@@ -40,7 +40,7 @@
                 </li>
 
                 <li class="sidebar-item has-sub {{ Request::is('categories.index*') ? 'active' : '' }}">
-                    <a href="#" class='sidebar-link'>
+                    <a class='sidebar-link'>
                         {{-- <i class="bi bi-card-checklist"></i> --}}
                         <i class="bi bi-list-nested"></i>
                         <span>Kategori</span>
@@ -54,7 +54,7 @@
                 </li>
 
                 <li class="sidebar-item has-sub {{ Request::is('asset.index*') ? 'active' : '' }}">
-                    <a href="#" class='sidebar-link'>
+                    <a class='sidebar-link'>
                         {{-- <i class="bi bi-card-checklist"></i> --}}
                         <i class="bi bi-folder"></i>
                         <span>Aset</span>
@@ -68,14 +68,14 @@
                 </li>
 
                 <li class="sidebar-item has-sub {{ Request::is('add-users*') ? 'active' : '' }}">
-                    <a href="#" class='sidebar-link'>
+                    <a class='sidebar-link'>
                         <i class="bi bi-card-checklist"></i>
-                        <span>Client</span>
+                        <span>Pengguna</span>
                     </a>
 
                     <ul class="submenu">
                         <li class="submenu-item {{ Request::routeIs('add-users.index') ? 'active' : '' }}">
-                            <a href="{{ route('add-users.index') }}" class="submenu-link">Daftar Client</a>
+                            <a href="{{ route('add-users.index') }}" class="submenu-link">Daftar Pengguna</a>
                         </li>
                     </ul>
                 </li>
@@ -90,7 +90,7 @@
 
             @if (auth()->user()->role->name == 'user')
                 <li class="sidebar-item has-sub {{ Request::is('cashs.index.owner*') ? 'active' : '' }}">
-                    <a href="#" class='sidebar-link'>
+                    <a class='sidebar-link'>
                         <i class="bi bi-cash"></i>
                         <span>Kas</span>
                     </a>
@@ -105,16 +105,16 @@
                     </ul>
                 </li>
 
-                <li class="sidebar-item has-sub {{ Request::is('categories-owner.index*') ? 'active' : '' }}">
-                    <a href="#" class='sidebar-link'>
+                <li class="sidebar-item has-sub {{ Request::is('asset.index*') ? 'active' : '' }}">
+                    <a class='sidebar-link'>
                         {{-- <i class="bi bi-card-checklist"></i> --}}
-                        <i class="bi bi-list-nested"></i>
-                        <span>Kategori</span>
+                        <i class="bi bi-folder"></i>
+                        <span>Aset</span>
                     </a>
 
                     <ul class="submenu">
-                        <li class="submenu-item {{ Request::routeIs('categories-owner.index') ? 'active' : '' }}">
-                            <a href="{{ route('categories-owner.index') }}" class="submenu-link">Daftar Kategori</a>
+                        <li class="submenu-item {{ Request::routeIs('asset.index') ? 'active' : '' }}">
+                            <a href="{{ route('asset.index') }}" class="submenu-link">Daftar Aset</a>
                         </li>
                     </ul>
                 </li>
@@ -140,7 +140,7 @@
             </li>
         </ul>
     </div>
-    
+
     <div class="position-absolute bottom-0 end-0 m-3">
 
         @include('partials.theme-switch')

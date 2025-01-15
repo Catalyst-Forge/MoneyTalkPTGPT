@@ -26,7 +26,7 @@ class AssetsTableSeeder extends Seeder
         $assetNames = ['Komputer', 'Laptop', 'Printer', 'AC', 'Meja Kantor', 'Kursi Kantor', 'Kendaraan Operasional', 'Mesin Fotokopi', 'UPS', 'Proyektor'];
 
         // Generate regular assets
-        for ($i = 0; $i < 50; $i++) {
+        for ($i = 0; $i < 11; $i++) {
             $value = $faker->randomFloat(2, 1000000, 100000000);
             $amount = rand(1, 10);
             $date = Carbon::parse($startDate)->addDays(rand(0, $endDate->diffInDays($startDate)));

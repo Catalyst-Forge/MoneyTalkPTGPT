@@ -86,6 +86,8 @@ Route::middleware(['auth', 'role.user'])->group(function () {
         'destroy' => 'cashs-out.destroy.owner',
     ]);
 
+    Route::resource('asset', AssetsController::class)->except(['show']);
+
     Route::get('/profile-owner', [ProfileOwnerUpdateController::class, 'index'])->name('profile.index.owner');
     Route::put('/profile-owner/update', [ProfileOwnerUpdateController::class, 'update'])->name('profile.update.owner');
     // Route::resource('add-users', AddUsersController::class);

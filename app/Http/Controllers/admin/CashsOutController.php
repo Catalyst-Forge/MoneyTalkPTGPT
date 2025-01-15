@@ -18,10 +18,24 @@ class CashsOutController extends Controller
      */
     public function index()
     {
-        $cashOuts = CashOut::all();
-        $totalBalance = Cash::sum('amount') - CashOut::sum('amount');
-        $totalBalanceCashOut = CashOut::sum('amount');
-        $categories = Category::all();
+        $cashOuts = CashOut::with(['category' => function($query) {
+            $query->where('type', 'cash_out');
+        }])->whereHas('category', function($query) {
+            $query->where('type', 'cash_out');
+        })->get();
+
+        $categories = Category::where('type', 'cash_out')->get();
+
+        $totalBalance = Cash::whereHas('category', function($query) {
+            $query->where('type', 'cash_in');
+        })->sum('amount') - CashOut::whereHas('category', function($query) {
+            $query->where('type', 'cash_out');
+        })->sum('amount');
+
+        $totalBalanceCashOut = CashOut::whereHas('category', function($query) {
+            $query->where('type', 'cash_out');
+        })->sum('amount');
+
         return view('admin.cashs-out.index', compact('cashOuts', 'totalBalance', 'categories', 'totalBalanceCashOut'));
     }
 
@@ -37,6 +51,12 @@ class CashsOutController extends Controller
             'notes' => 'nullable|string',
             'amount' => 'required|numeric|min:0',
         ]);
+
+        // Verify the category is cash_out type
+        $category = Category::findOrFail($request->category_id);
+        if ($category->type !== 'cash_out') {
+            return redirect()->back()->with('error', 'Invalid category type. Must be cash out type.');
+        }
 
         CashOut::create($request->all());
 
@@ -56,6 +76,12 @@ class CashsOutController extends Controller
             'amount' => 'required|numeric',
         ]);
 
+        // Verify the category is cash_out type
+        $category = Category::findOrFail($request->category_id);
+        if ($category->type !== 'cash_out') {
+            return redirect()->back()->with('error', 'Invalid category type. Must be cash out type.');
+        }
+
         $cash = CashOut::findOrFail($id);
         $cash->update($request->all());
 
@@ -68,6 +94,12 @@ class CashsOutController extends Controller
     public function destroy(string $id)
     {
         $cash = CashOut::findOrFail($id);
+
+        // Verify the category is cash_out type before deletion
+        if ($cash->category->type !== 'cash_out') {
+            return redirect()->back()->with('error', 'Invalid category type. Must be cash out type.');
+        }
+
         $cash->delete();
 
         return redirect()->route('cashs-out.index')->with('success', 'Cash out entry deleted successfully.');
@@ -80,8 +112,14 @@ class CashsOutController extends Controller
 
     public function exportPDF()
     {
-        $cashs_out = CashOut::all();
-        $totalBalanceCashOut = CashOut::sum('amount');
+        $cashs_out = CashOut::whereHas('category', function($query) {
+            $query->where('type', 'cash_out');
+        })->get();
+
+        $totalBalanceCashOut = CashOut::whereHas('category', function($query) {
+            $query->where('type', 'cash_out');
+        })->sum('amount');
+
         $pdf = Pdf::loadView('admin.cashs-out.pdf', compact('cashs_out', 'totalBalanceCashOut'));
         return $pdf->download('laporan_kas_keluar.pdf');
     }
@@ -91,10 +129,15 @@ class CashsOutController extends Controller
         $month = $request->input('month');
 
         if ($month) {
-            $cashOuts = CashOut::with('category')
-                ->whereMonth('date', '=', \Carbon\Carbon::parse($month)->month)
-                ->whereYear('date', '=', \Carbon\Carbon::parse($month)->year)
-                ->get();
+            $cashOuts = CashOut::with(['category' => function($query) {
+                $query->where('type', 'cash_out');
+            }])
+            ->whereHas('category', function($query) {
+                $query->where('type', 'cash_out');
+            })
+            ->whereMonth('date', '=', \Carbon\Carbon::parse($month)->month)
+            ->whereYear('date', '=', \Carbon\Carbon::parse($month)->year)
+            ->get();
 
             $totalAmount = $cashOuts->sum('amount');
         } else {

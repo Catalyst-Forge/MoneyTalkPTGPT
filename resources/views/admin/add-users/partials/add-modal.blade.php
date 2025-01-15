@@ -26,7 +26,17 @@
                             @foreach ($roles as $role)
                                 <option value="{{ $role->id }}">
                                     @if ($role->name == 'user')
-                                        Owner
+                                        Direksi
+                                    @endif
+                                </option>
+                                <option value="{{ $role->id }}">
+                                    @if ($role->name == 'user')
+                                        Direktur Utama
+                                    @endif
+                                </option>
+                                <option value="{{ $role->id }}">
+                                    @if ($role->name == 'user')
+                                        Direktur Keuangan
                                     @endif
                                 </option>
                             @endforeach

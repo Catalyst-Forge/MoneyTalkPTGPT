@@ -25,6 +25,7 @@
                                     <tr>
                                         <th>No</th>
                                         <th>Name</th>
+                                        <th>Type</th>
                                         @if (auth()->user()->role->name == 'admin')
                                             <th>Aksi</th>
                                         @endif
@@ -35,6 +36,7 @@
                                         <tr>
                                             <td>{{ $loop->iteration }}</td>
                                             <td>{{ $category->name }}</td>
+                                            <td>{{ ucwords(str_replace('_', ' ', $category->type)) }}</td>
                                             @if (auth()->user()->role->name == 'admin')
                                             <td class="text-nowrap">
                                                 <div class="dropdown dropup">
@@ -88,6 +90,15 @@
                             <label for="name" class="form-label">Nama</label>
                             <input type="text" class="form-control" id="name" name="name" required>
                         </div>
+                        <div class="mb-3">
+                            <label for="type" class="form-label">Tipe</label>
+                            <select class="form-select" id="type" name="type" required>
+                                <option value="">Pilih Tipe</option>
+                                <option value="cash_in">Cash In</option>
+                                <option value="cash_out">Cash Out</option>
+                                <option value="asset">Asset</option>
+                            </select>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
@@ -114,6 +125,15 @@
                             <label for="edit_name" class="form-label">Nama</label>
                             <input type="text" class="form-control" id="edit_name" name="name" required>
                         </div>
+                        <div class="mb-3">
+                            <label for="edit_type" class="form-label">Tipe</label>
+                            <select class="form-select" id="edit_type" name="type" required>
+                                <option value="">Pilih Tipe</option>
+                                <option value="cash_in">Cash In</option>
+                                <option value="cash_out">Cash Out</option>
+                                <option value="asset">Asset</option>
+                            </select>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
@@ -130,6 +150,7 @@
         function editCategory(category) {
             document.getElementById('editCategoryForm').action = `/categories/${category.id}`;
             document.getElementById('edit_name').value = category.name;
+            document.getElementById('edit_type').value = category.type;
             $('#editCategoryModal').modal('show');
         }
     </script>

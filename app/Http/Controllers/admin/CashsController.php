@@ -18,10 +18,21 @@ class CashsController extends Controller
      */
     public function index()
     {
-        $cashs = Cash::with('category')->get();
-        $categories = Category::all();
-        $totalBalance = Cash::sum('amount') - CashOut::sum('amount');
-        $totalBalanceCashIn = Cash::sum('amount');
+        $cashs = Cash::with(['category' => function($query) {
+            $query->where('type', 'cash_in');
+        }])->whereHas('category', function($query) {
+            $query->where('type', 'cash_in');
+        })->get();
+
+        $categories = Category::where('type', 'cash_in')->get();
+        $totalBalance = Cash::whereHas('category', function($query) {
+            $query->where('type', 'cash_in');
+        })->sum('amount') - CashOut::sum('amount');
+
+        $totalBalanceCashIn = Cash::whereHas('category', function($query) {
+            $query->where('type', 'cash_in');
+        })->sum('amount');
+
         return view('admin.cashs.index', compact('cashs', 'categories', 'totalBalance', 'totalBalanceCashIn'));
     }
 
@@ -37,6 +48,12 @@ class CashsController extends Controller
             'notes' => 'nullable|string',
             'amount' => 'required|numeric',
         ]);
+
+        // Verify the category is cash_in type
+        $category = Category::findOrFail($request->category_id);
+        if ($category->type !== 'cash_in') {
+            return redirect()->back()->with('error', 'Invalid category type. Must be cash in type.');
+        }
 
         Cash::create($request->all());
 
@@ -56,6 +73,12 @@ class CashsController extends Controller
             'amount' => 'required|numeric',
         ]);
 
+        // Verify the category is cash_in type
+        $category = Category::findOrFail($request->category_id);
+        if ($category->type !== 'cash_in') {
+            return redirect()->back()->with('error', 'Invalid category type. Must be cash in type.');
+        }
+
         $cash = Cash::findOrFail($id);
         $cash->update($request->all());
 
@@ -68,6 +91,12 @@ class CashsController extends Controller
     public function destroy(string $id)
     {
         $cash = Cash::findOrFail($id);
+
+        // Verify the category is cash_in type before deletion
+        if ($cash->category->type !== 'cash_in') {
+            return redirect()->back()->with('error', 'Invalid category type. Must be cash in type.');
+        }
+
         $cash->delete();
 
         return redirect()->route('cashs.index')->with('success', 'Cash entry deleted successfully.');
@@ -80,8 +109,14 @@ class CashsController extends Controller
 
     public function exportPDF()
     {
-        $cashs = Cash::all();
-        $totalBalanceCashIn = Cash::sum('amount');
+        $cashs = Cash::whereHas('category', function($query) {
+            $query->where('type', 'cash_in');
+        })->get();
+
+        $totalBalanceCashIn = Cash::whereHas('category', function($query) {
+            $query->where('type', 'cash_in');
+        })->sum('amount');
+
         $pdf = Pdf::loadView('admin.cashs.pdf', compact('cashs', 'totalBalanceCashIn'));
         return $pdf->download('laporan_kas_masuk.pdf');
     }
@@ -91,10 +126,15 @@ class CashsController extends Controller
         $month = $request->input('month');
 
         if ($month) {
-            $cashs = Cash::with('category')
-                ->whereMonth('date', '=', \Carbon\Carbon::parse($month)->month)
-                ->whereYear('date', '=', \Carbon\Carbon::parse($month)->year)
-                ->get();
+            $cashs = Cash::with(['category' => function($query) {
+                $query->where('type', 'cash_in');
+            }])
+            ->whereHas('category', function($query) {
+                $query->where('type', 'cash_in');
+            })
+            ->whereMonth('date', '=', \Carbon\Carbon::parse($month)->month)
+            ->whereYear('date', '=', \Carbon\Carbon::parse($month)->year)
+            ->get();
 
             $totalAmount = $cashs->sum('amount');
         } else {
