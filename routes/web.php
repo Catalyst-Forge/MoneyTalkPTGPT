@@ -3,9 +3,9 @@
 use App\Http\Controllers\admin\AddUsersController;
 use App\Http\Controllers\admin\AdminController;
 use App\Http\Controllers\admin\AssetsController;
-use App\Http\Controllers\Admin\CashsController;
+use App\Http\Controllers\admin\CashsController;
 use App\Http\Controllers\admin\CashsOutController;
-use App\Http\Controllers\Admin\CategoriesController;
+use App\Http\Controllers\admin\CategoriesController;
 use App\Http\Controllers\admin\ProfileUpdateController;
 use App\Http\Controllers\user\ProfileOwnerUpdateController;
 use App\Http\Controllers\user\UserController;
