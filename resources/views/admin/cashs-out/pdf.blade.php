@@ -116,7 +116,7 @@
         </tr>
       </thead>
       <tbody>
-        @foreach ($cashOuts as $cashOut)
+        @foreach ($cashs_out as $cashOut)
           <tr>
             <td>{{ $loop->iteration }}</td>
             <td>{{ \Carbon\Carbon::parse($cashOut->date)->translatedFormat('d F Y') }}</td>
@@ -129,7 +129,7 @@
       </tbody>
       <tfoot>
         <tr class="total-row">
-          <td colspan="6">Grand Total</td>
+          <td colspan="5">Grand Total</td>
           <td>Rp. {{ number_format($totalBalanceCashOut, 0, ',', '.') }}</td>
         </tr>
       </tfoot>

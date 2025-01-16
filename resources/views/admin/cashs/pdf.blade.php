@@ -130,7 +130,7 @@
       </tbody>
       <tfoot>
         <tr class="total-row">
-          <td colspan="6">Grand Total</td>
+          <td colspan="5">Grand Total</td>
           <td>Rp. {{ number_format($totalBalanceCashIn, 0, ',', '.') }}</td>
         </tr>
       </tfoot>
