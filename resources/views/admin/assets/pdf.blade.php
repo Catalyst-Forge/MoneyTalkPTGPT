@@ -16,24 +16,41 @@
     }
 
     .report-header {
+      margin-bottom: 20px;
+      width: 100%;
+      display: table;
+    }
+
+    .report-header .logo {
+      display: table-cell;
+      width: 20%;
+      vertical-align: middle;
       text-align: center;
-      margin-bottom: 30px;
-      padding: 20px;
+    }
+
+    .report-header .info {
+      display: table-cell;
+      width: 80%;
+      text-align: center;
+    }
+
+    .report-header img {
+      max-width: 100px;
+      height: auto;
     }
 
     .report-header h1 {
-      font-size: 28pt;
       margin: 0;
+      font-size: 24pt;
     }
 
     .report-header h2 {
-      font-size: 16pt;
-      margin: 5px 0;
+      margin: 0 0 5px 0;
+      font-size: 14pt;
     }
 
-    .report-header p {
-      margin: 0;
-      font-size: 12pt;
+    .report-header small {
+      font-size: 10pt;
     }
 
     .report-footer {
@@ -75,10 +92,17 @@
 
 <body>
   <div class="container">
-    <div class="report-header">
-      <h1>Laporan Aset Inventaris</h1>
-      <h2>Company Name</h2>
-    </div>
+    <header class="report-header">
+      <div class="logo">
+        <img src="{{ public_path('assets/compiled/png/logo.png') }}" alt="Logo cap laporan">
+      </div>
+      <div class="info">
+        <h1>PT GPT</h1>
+        <h2>CCTV Terpercaya No 1 di Bandung</h2>
+        <small>Jl. Mochamad Toha No. 158 - RT. 002/10 Kel. Pelindung Hewan, Astanaanyar <br> Kota Bandung, Jawa Barat
+          40243 P: 0813 2221 1101</small>
+      </div>
+    </header>
 
     <table>
       <thead>
