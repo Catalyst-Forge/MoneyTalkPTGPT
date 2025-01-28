@@ -4,7 +4,6 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="{{ asset('assets/compiled/css/app.css') }}">
   <title>Laporan Kas Masuk</title>
   <style>
     body {
@@ -16,31 +15,41 @@
       max-width: 100%;
     }
 
+    .text-center {
+      text-align: center;
+    }
+
+    .mt-5 {
+      margin-top: 1.5rem;
+    }
+    
     .report-header {
       margin-bottom: 20px;
+      border-bottom: 1px solid #000;
+      padding-bottom: 1rem;
       width: 100%;
       display: table;
     }
 
     .report-header .logo {
       display: table-cell;
-      width: 20%;
+      width: 10%;
       vertical-align: middle;
       text-align: center;
     }
 
-    .report-header .info {
-      display: table-cell;
-      width: 80%;
-      text-align: center;
-    }
-
-    .report-header img {
+    .report-header .logo img {
       max-width: 100px;
       height: auto;
     }
 
-    .report-header h1 {
+    .report-header .info {
+      display: table-cell;
+      width: 90%;
+      text-align: center;
+    }
+
+    .report-header .info h1 {
       margin: 0;
       font-size: 24pt;
     }
@@ -104,6 +113,8 @@
           40243 P: 0813 2221 1101</small>
       </div>
     </header>
+
+    <h3 class="text-center mt-5">Laporan Keuangan Kas Masuk Bulan {{ $formattedMonth }}</h3>
 
     <table>
       <thead>

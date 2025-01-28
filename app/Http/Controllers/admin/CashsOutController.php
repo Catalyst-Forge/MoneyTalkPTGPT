@@ -18,21 +18,27 @@ class CashsOutController extends Controller
      */
     public function index()
     {
-        $cashOuts = CashOut::with(['category' => function($query) {
-            $query->where('type', 'cash_out');
-        }])->whereHas('category', function($query) {
-            $query->where('type', 'cash_out');
-        })->get();
+        $cashOuts = CashOut::with([
+            'category' => function ($query) {
+                $query->where('type', 'cash_out');
+            },
+        ])
+            ->whereHas('category', function ($query) {
+                $query->where('type', 'cash_out');
+            })
+            ->get();
 
         $categories = Category::where('type', 'cash_out')->get();
 
-        $totalBalance = Cash::whereHas('category', function($query) {
-            $query->where('type', 'cash_in');
-        })->sum('amount') - CashOut::whereHas('category', function($query) {
-            $query->where('type', 'cash_out');
-        })->sum('amount');
+        $totalBalance =
+            Cash::whereHas('category', function ($query) {
+                $query->where('type', 'cash_in');
+            })->sum('amount') -
+            CashOut::whereHas('category', function ($query) {
+                $query->where('type', 'cash_out');
+            })->sum('amount');
 
-        $totalBalanceCashOut = CashOut::whereHas('category', function($query) {
+        $totalBalanceCashOut = CashOut::whereHas('category', function ($query) {
             $query->where('type', 'cash_out');
         })->sum('amount');
 
@@ -105,23 +111,37 @@ class CashsOutController extends Controller
         return redirect()->route('cashs-out.index')->with('success', 'Cash out entry deleted successfully.');
     }
 
-    public function exportExcel()
+    public function exportExcel(Request $request)
     {
-        return Excel::download(new CashsOutExport, 'cashout_entries.xlsx');
+        $selectedMonth = $request->input('month');
+
+        return Excel::download(new CashsOutExport($selectedMonth), 'Cash_Out_Entries_' . \Carbon\Carbon::parse($selectedMonth)->translatedFormat('F_Y') . '.xlsx');
     }
 
-    public function exportPDF()
+    public function exportPDF(Request $request)
     {
-        $cashs_out = CashOut::whereHas('category', function($query) {
-            $query->where('type', 'cash_out');
-        })->get();
+        $month = $request->input('month');
 
-        $totalBalanceCashOut = CashOut::whereHas('category', function($query) {
-            $query->where('type', 'cash_out');
-        })->sum('amount');
+        if ($month) {
+            $cashs_out = CashOut::with([
+                'category' => function ($query) {
+                    $query->where('type', 'cash_out');
+                },
+            ])
+                ->whereHas('category', function ($query) {
+                    $query->where('type', 'cash_out');
+                })
+                ->whereMonth('date', '=', \Carbon\Carbon::parse($month)->month)
+                ->whereYear('date', '=', \Carbon\Carbon::parse($month)->year)
+                ->get();
+        }
 
-        $pdf = Pdf::loadView('admin.cashs-out.pdf', compact('cashs_out', 'totalBalanceCashOut'));
-        return $pdf->download('laporan_kas_keluar.pdf');
+        $formattedMonthRaw = \Carbon\Carbon::parse($month)->translatedFormat('F_Y');
+        $formattedMonth = \Carbon\Carbon::parse($month)->locale('id')->translatedFormat('F Y');
+        $totalBalanceCashOut = $cashs_out->sum('amount');
+
+        $pdf = Pdf::loadView('admin.cashs-out.pdf', compact('cashs_out', 'totalBalanceCashOut', 'formattedMonth'));
+        return $pdf->download('Cash_Out_Report_' . $formattedMonthRaw . '.pdf');
     }
 
     public function monthlyReport(Request $request)
@@ -129,15 +149,17 @@ class CashsOutController extends Controller
         $month = $request->input('month');
 
         if ($month) {
-            $cashOuts = CashOut::with(['category' => function($query) {
-                $query->where('type', 'cash_out');
-            }])
-            ->whereHas('category', function($query) {
-                $query->where('type', 'cash_out');
-            })
-            ->whereMonth('date', '=', \Carbon\Carbon::parse($month)->month)
-            ->whereYear('date', '=', \Carbon\Carbon::parse($month)->year)
-            ->get();
+            $cashOuts = CashOut::with([
+                'category' => function ($query) {
+                    $query->where('type', 'cash_out');
+                },
+            ])
+                ->whereHas('category', function ($query) {
+                    $query->where('type', 'cash_out');
+                })
+                ->whereMonth('date', '=', \Carbon\Carbon::parse($month)->month)
+                ->whereYear('date', '=', \Carbon\Carbon::parse($month)->year)
+                ->get();
 
             $totalAmount = $cashOuts->sum('amount');
         } else {

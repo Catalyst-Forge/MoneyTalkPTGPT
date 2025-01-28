@@ -18,18 +18,23 @@ class CashsController extends Controller
      */
     public function index()
     {
-        $cashs = Cash::with(['category' => function($query) {
-            $query->where('type', 'cash_in');
-        }])->whereHas('category', function($query) {
-            $query->where('type', 'cash_in');
-        })->get();
+        $cashs = Cash::with([
+            'category' => function ($query) {
+                $query->where('type', 'cash_in');
+            },
+        ])
+            ->whereHas('category', function ($query) {
+                $query->where('type', 'cash_in');
+            })
+            ->get();
 
         $categories = Category::where('type', 'cash_in')->get();
-        $totalBalance = Cash::whereHas('category', function($query) {
-            $query->where('type', 'cash_in');
-        })->sum('amount') - CashOut::sum('amount');
+        $totalBalance =
+            Cash::whereHas('category', function ($query) {
+                $query->where('type', 'cash_in');
+            })->sum('amount') - CashOut::sum('amount');
 
-        $totalBalanceCashIn = Cash::whereHas('category', function($query) {
+        $totalBalanceCashIn = Cash::whereHas('category', function ($query) {
             $query->where('type', 'cash_in');
         })->sum('amount');
 
@@ -102,23 +107,37 @@ class CashsController extends Controller
         return redirect()->route('cashs.index')->with('success', 'Cash entry deleted successfully.');
     }
 
-    public function exportExcel()
+    public function exportExcel(Request $request)
     {
-        return Excel::download(new CashsExport, 'cash_entries.xlsx');
+        $selectedMonth = $request->input('month');
+
+        return Excel::download(new CashsExport($selectedMonth), 'Cash_In_Entries_' . \Carbon\Carbon::parse($selectedMonth)->translatedFormat('F_Y') . '.xlsx');
     }
 
-    public function exportPDF()
+    public function exportPDF(Request $request)
     {
-        $cashs = Cash::whereHas('category', function($query) {
-            $query->where('type', 'cash_in');
-        })->get();
+        $month = $request->input('month');
 
-        $totalBalanceCashIn = Cash::whereHas('category', function($query) {
-            $query->where('type', 'cash_in');
-        })->sum('amount');
+        if ($month) {
+            $cashs = Cash::with([
+                'category' => function ($query) {
+                    $query->where('type', 'cash_in');
+                },
+            ])
+                ->whereHas('category', function ($query) {
+                    $query->where('type', 'cash_in');
+                })
+                ->whereMonth('date', '=', \Carbon\Carbon::parse($month)->month)
+                ->whereYear('date', '=', \Carbon\Carbon::parse($month)->year)
+                ->get();
+        }
 
-        $pdf = Pdf::loadView('admin.cashs.pdf', compact('cashs', 'totalBalanceCashIn'));
-        return $pdf->download('laporan_kas_masuk.pdf');
+        $formattedMonthRaw = \Carbon\Carbon::parse($month)->translatedFormat('F_Y');
+        $formattedMonth = \Carbon\Carbon::parse($month)->locale('id')->translatedFormat('F Y');
+        $totalBalanceCashIn = $cashs->sum('amount');
+
+        $pdf = Pdf::loadView('admin.cashs.pdf', compact('cashs', 'totalBalanceCashIn', 'formattedMonth'));
+        return $pdf->download('Cash_In_Report_' . $formattedMonthRaw . '.pdf');
     }
 
     public function monthlyReport(Request $request)
@@ -126,15 +145,17 @@ class CashsController extends Controller
         $month = $request->input('month');
 
         if ($month) {
-            $cashs = Cash::with(['category' => function($query) {
-                $query->where('type', 'cash_in');
-            }])
-            ->whereHas('category', function($query) {
-                $query->where('type', 'cash_in');
-            })
-            ->whereMonth('date', '=', \Carbon\Carbon::parse($month)->month)
-            ->whereYear('date', '=', \Carbon\Carbon::parse($month)->year)
-            ->get();
+            $cashs = Cash::with([
+                'category' => function ($query) {
+                    $query->where('type', 'cash_in');
+                },
+            ])
+                ->whereHas('category', function ($query) {
+                    $query->where('type', 'cash_in');
+                })
+                ->whereMonth('date', '=', \Carbon\Carbon::parse($month)->month)
+                ->whereYear('date', '=', \Carbon\Carbon::parse($month)->year)
+                ->get();
 
             $totalAmount = $cashs->sum('amount');
         } else {

@@ -16,6 +16,18 @@
                             <button type="submit" class="btn btn-primary">Tampilkan</button>
                         </div>
                     </form>
+                    
+                    <div class="d-flex align-items-center gap-3 mt-3">
+                        <form action="{{ route('cashs.exportExcel') }}" method="GET">
+                            <input type="hidden" name="month" value="{{ request('month') }}">
+                            <button type="submit" class="btn btn-success">Export Excel</button>
+                        </form>
+    
+                        <form action="{{ route('cashs.exportPdf') }}" method="GET">
+                            <input type="hidden" name="month" value="{{ request('month') }}">
+                            <button type="submit" class="btn btn-secondary">Export PDF</button>
+                        </form>
+                    </div>
                 </div>
             </div>
 

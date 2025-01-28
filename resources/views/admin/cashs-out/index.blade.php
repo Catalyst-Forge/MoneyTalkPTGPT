@@ -21,12 +21,6 @@
                                         data-bs-target="#addCashOutModal">
                                         Tambah Kas Keluar Baru
                                     </button>
-                                    <a href="{{ route('cashsout.exportExcel') }}" class="btn btn-success ms-2">
-                                        Export to Excel
-                                    </a>
-                                    <a href="{{ route('cashsout.exportPdf') }}" class="btn btn-secondary ms-2">
-                                        Export to PDF
-                                    </a>
                                 </div>
                             @endif
                             <form id="monthlyReportForm" action="{{ route('cashOut.monthlyReport') }}" method="GET">

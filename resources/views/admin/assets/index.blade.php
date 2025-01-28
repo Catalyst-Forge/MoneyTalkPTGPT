@@ -20,11 +20,6 @@
                                     <button class="btn btn-primary" data-bs-toggle="modal"
                                         data-bs-target="#addAssetModal">Tambah Aset
                                         Baru</button>
-
-                                    <a href="{{ route('asset.exportExcel') }}" class="btn btn-success ms-2"
-                                        role="button">Export to Excel</a>
-                                    <a href="{{ route('asset.exportPdf') }}" class="btn btn-secondary ms-2"
-                                        role="button">Export to PDF</a>
                                 </div>
                             @endif
 

@@ -20,12 +20,6 @@
                   <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCashModal">
                     Tambah Kas Masuk Baru
                   </button>
-                  <a href="{{ route('cashs.exportExcel') }}" class="btn btn-success ms-2">
-                    Export to Excel
-                  </a>
-                  <a href="{{ route('cashs.exportPdf') }}" class="btn btn-secondary ms-2">
-                    Export to PDF
-                  </a>
                 </div>
               @endif
               <form id="monthlyReportForm" action="{{ route('cashs.monthlyReport') }}" method="GET">

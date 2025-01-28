@@ -5,67 +5,54 @@ namespace App\Http\Controllers\admin;
 use App\Http\Controllers\Controller;
 use App\Models\Cash;
 use App\Models\CashOut;
-use App\Models\Category;
-use App\Models\Assets;
-use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class AdminController extends Controller
 {
     public function index()
     {
+        function getCashData($model, $selectedYear, $selectedMonth = null)
+        {
+            $query = $model::selectRaw('DATE_FORMAT(date, "%Y-%m") as month, SUM(amount) as total')->whereYear('date', $selectedYear)->groupBy('month')->orderBy('month');
+
+            if ($selectedMonth) {
+                $query->whereMonth('date', $selectedMonth);
+            }
+
+            return $query->pluck('total', 'month')->toArray();
+        }
+
         // Total kas masuk, keluar, dan saldo
         $totalCashIn = Cash::sum('amount');
         $totalCashOut = CashOut::sum('amount');
         $totalBalance = $totalCashIn - $totalCashOut;
 
-        // Get available years from both cash in and cash out
-        $availableYears = collect()
-            ->concat(Cash::selectRaw('YEAR(date) as year')->distinct()->pluck('year'))
-            ->concat(CashOut::selectRaw('YEAR(date) as year')->distinct()->pluck('year'))
-            ->unique()
-            ->sort()
-            ->values();
+        // Mengambil tahun dari kas masuk dan kas keluar
+        $availableMonth = Cash::selectRaw('DATE_FORMAT(date, "%Y-%m") as month')->distinct()->union(CashOut::selectRaw('DATE_FORMAT(date, "%Y-%m") as month')->distinct())->orderBy('month')->pluck('month')->toArray();
 
-        // Get current year or selected year
-        $selectedYear = request('year', now()->year);
+        // Mengambil tahun sekarang atau bulan yang dipilih
+        $selectedMonthYear = request('month', now()->format('Y-m'));
+        [$selectedYear, $selectedMonth] = explode('-', $selectedMonthYear);
 
-        // Data kas masuk per bulan untuk tahun terpilih
-        $cashInData = Cash::select(DB::raw('LAST_DAY(date) as date'), DB::raw('SUM(amount) as total'))->whereYear('date', $selectedYear)->groupBy(DB::raw('LAST_DAY(date)'))->orderBy('date')->pluck('total', 'date')->toArray();
+        // Data kas masuk dan keluar untuk bulan terakhir
+        $lastMonth = Carbon::now()->subMonth();
+        $lastMonthYear = $lastMonth->format('Y-m');
+        $lastMonthName = $lastMonth->translatedFormat('F Y');
 
-        // Data kas keluar per bulan untuk tahun terpilih
-        $cashOutData = CashOut::select(DB::raw('LAST_DAY(date) as date'), DB::raw('SUM(amount) as total'))->whereYear('date', $selectedYear)->groupBy(DB::raw('LAST_DAY(date)'))->orderBy('date')->pluck('total', 'date')->toArray();
+        $lastMonthCashIn = Cash::whereYear('date', $lastMonth->year)
+            ->whereMonth('date', $lastMonth->month)
+            ->sum('amount');
+        $lastMonthCashOut = CashOut::whereYear('date', $lastMonth->year)
+            ->whereMonth('date', $lastMonth->month)
+            ->sum('amount');
 
-        // Data aset
-        $assetData = Assets::select('name', 'total')
-            ->orderBy('total', 'desc')
-            ->get()
-            ->toArray();
+        // Data kas masuk dan keluar (dengan fungsi dinamis)
+        $cashInDataMonthly = getCashData(Cash::class, $selectedYear, $selectedMonth);
+        $cashOutDataMonthly = getCashData(CashOut::class, $selectedYear, $selectedMonth);
 
-        // Kategori kas masuk
-        $cashInCategoryData = Cash::join('categories', 'cashs.category_id', '=', 'categories.id')
-            ->select('categories.name', DB::raw('SUM(cashs.amount) as total'))
-            ->groupBy('categories.id', 'categories.name')
-            ->pluck('total', 'name')
-            ->toArray();
+        $cashInDataYearly = getCashData(Cash::class, $selectedYear);
+        $cashOutDataYearly = getCashData(CashOut::class, $selectedYear);
 
-        // Kategori kas keluar
-        $cashOutCategoryData = CashOut::join('categories', 'cash_outs.category_id', '=', 'categories.id')
-            ->select('categories.name', DB::raw('SUM(cash_outs.amount) as total'))
-            ->groupBy('categories.id', 'categories.name')
-            ->pluck('total', 'name')
-            ->toArray();
-
-            return view('admin.dashboard', compact(
-                'availableYears',
-                'selectedYear',
-                'totalCashIn',
-                'totalCashOut',
-                'totalBalance',
-                'cashInData',
-                'cashOutData',
-                'assetData',
-                'cashInCategoryData',
-                'cashOutCategoryData'
-            ));
+        return view('admin.dashboard', compact('availableMonth', 'selectedMonthYear', 'selectedYear', 'totalCashIn', 'totalCashOut', 'totalBalance', 'cashInDataMonthly', 'cashOutDataMonthly', 'cashInDataYearly', 'cashOutDataYearly', 'lastMonthYear', 'lastMonthName', 'lastMonthCashIn', 'lastMonthCashOut'));
     }
 }

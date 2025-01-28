@@ -35,11 +35,11 @@
   <div class="row mt-4">
     <div class="col-md-12 mb-3">
       <div class="d-flex align-items-center">
-        <label for="yearFilter" class="me-2">Pilih Tahun:</label>
-        <select id="yearFilter" class="form-select" style="width: auto;">
-          @foreach($availableYears as $year)
-            <option value="{{ $year }}" {{ $year == $selectedYear ? 'selected' : '' }}>
-              {{ $year }}
+        <label for="monthFilter" class="me-2">Pilih Bulan:</label>
+        <select id="monthFilter" class="form-select" style="width: auto;">
+          @foreach ($availableMonth as $month)
+            <option value="{{ $month }}" {{ $month == $selectedMonthYear ? 'selected' : '' }}>
+              {{ \Carbon\Carbon::createFromFormat('Y-m', $month)->translatedFormat('F Y') }}
             </option>
           @endforeach
         </select>
@@ -49,51 +49,59 @@
 
   <div class="row">
     <div class="col-md-6">
-      <h2>Kas Masuk per Bulan</h2>
+      <h2 class="cashMonthTitle">Kas Masuk Bulan </h2>
       <div id="cashInChart"></div>
     </div>
 
     <div class="col-md-6">
-      <h2>Kas Keluar per Bulan</h2>
+      <h2 class="cashMonthTitle">Kas Keluar Bulan </h2>
       <div id="cashOutChart"></div>
     </div>
   </div>
 
   <div class="row mt-4">
-    <div class="col-md-12">
-      <h2>Data Aset</h2>
-      <div id="assetChart"></div>
+    <div class="col-md-6">
+      <h2 class="cashYearTitle">Kas Masuk Tahun </h2>
+      <div id="cashInChartYear"></div>
+    </div>
+
+    <div class="col-md-6">
+      <h2 class="cashYearTitle">Kas Keluar Tahun </h2>
+      <div id="cashOutChartYear"></div>
     </div>
   </div>
 
-  <div class="row mt-4">
-    <div class="col-md-6">
-      <h2>Kategori Kas Masuk</h2>
-      <div id="cashInCategoryChart"></div>
-    </div>
-
-    <div class="col-md-6">
-      <h2>Kategori Kas Keluar</h2>
-      <div id="cashOutCategoryChart"></div>
+  <div class="row">
+    <div class="col-md-12">
+      <h2 class="text-center">Diagram Pemasukan dan Pengeluaran Bulan {{ $lastMonthName }}</h2>
+      <div id="lastMonthChart"></div>
     </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
   <script>
     // Data dari controller
-    var cashInData = {!! json_encode($cashInData) !!};
-    var cashOutData = {!! json_encode($cashOutData) !!};
-    var assetData = {!! json_encode($assetData) !!};
-    var cashInCategoryData = {!! json_encode($cashInCategoryData) !!};
-    var cashOutCategoryData = {!! json_encode($cashOutCategoryData) !!};
+    var cashInDataMonthly = {!! json_encode($cashInDataMonthly) !!};
+    var cashOutDataMonthly = {!! json_encode($cashOutDataMonthly) !!};
+    var cashInDataYearly = {!! json_encode($cashInDataYearly) !!};
+    var cashOutDataYearly = {!! json_encode($cashOutDataYearly) !!};
+    var lastMonthCashIn = {!! json_encode($lastMonthCashIn) !!}
+    var lastMonthCashOut = {!! json_encode($lastMonthCashOut) !!}
     var selectedYear = {!! json_encode($selectedYear) !!};
 
+    const dateInputFilter = document.getElementById('monthFilter')
+
     // Event listener untuk filter tahun
-    document.getElementById('yearFilter').addEventListener('change', function() {
-      const year = this.value;
-      window.location.href = `?year=${year}`;
+    dateInputFilter.addEventListener('change', function() {
+      const month = this.value;
+      window.location.href = `?month=${month}`;
     });
 
+    // DOM Manipulation untuk mengganti bulan pada kas masuk dan kas keluar perbulan
+    document.querySelectorAll('.cashMonthTitle').forEach(title => title.textContent += formatMonth(dateInputFilter.value,
+      'month'))
+    document.querySelectorAll('.cashYearTitle').forEach(title => title.textContent += formatMonth(dateInputFilter.value,
+      'year'))
 
     // Fungsi format Rupiah
     function formatRupiah(value) {
@@ -101,11 +109,18 @@
     }
 
     // Fungsi untuk format tanggal bulan
-    function formatMonth(date) {
-      return new Date(date).toLocaleDateString('id-ID', {
-        month: 'long',
-        year: 'numeric'
-      });
+    function formatMonth(date, format = 'both') {
+      const options = format === 'month' ? {
+          month: 'long'
+        } :
+        format === 'year' ? {
+          year: 'numeric'
+        } : {
+          month: 'long',
+          year: 'numeric'
+        };
+
+      return new Date(date).toLocaleDateString('id-ID', options);
     }
 
     // Fungsi untuk merender diagram
@@ -217,69 +232,86 @@
       }
     };
 
+    // Data bulan terakhir untuk pemasukan dan pengeluaran
+    const lastMonthData = {
+      series: [{{ $lastMonthCashIn }}, {{ $lastMonthCashOut }}],
+      labels: ['Pemasukan', 'Pengeluaran']
+    }
+
+    // Konfigurasi diagram bulan terakhir untuk pemasukan dan pengeluaran
+    const lastMonthChartConfig = {
+      chart: {
+        type: 'pie',
+        height: 400
+      },
+      labels: lastMonthData.labels,
+      series: lastMonthData.series,
+      colors: ['#00e396', '#ff4560'],
+      tooltip: {
+        y: {
+          formatter: function(value) {
+            return formatRupiah(value)
+          }
+        }
+      },
+      legend: {
+        position: 'bottom'
+      }
+    }
+
     // Render charts
     renderChart("#cashInChart", {
       ...monthlyBarConfig,
       series: [{
         name: 'Kas Masuk',
-        data: Object.values(cashInData)
+        data: Object.values(cashInDataMonthly)
       }],
       xaxis: {
         ...monthlyBarConfig.xaxis,
-        categories: Object.keys(cashInData).map(formatMonth)
+        categories: Object.keys(cashInDataMonthly).map(formatMonth)
       },
       colors: ['#00E396']
-    });
+    })
 
     renderChart("#cashOutChart", {
       ...monthlyBarConfig,
       series: [{
         name: 'Kas Keluar',
-        data: Object.values(cashOutData)
+        data: Object.values(cashOutDataMonthly)
       }],
       xaxis: {
         ...monthlyBarConfig.xaxis,
-        categories: Object.keys(cashOutData).map(formatMonth)
+        categories: Object.keys(cashOutDataMonthly).map(formatMonth)
       },
       colors: ['#FF4560']
     });
 
-    renderChart("#assetChart", {
-      ...barChartConfig,
+    renderChart("#cashInChartYear", {
+      ...monthlyBarConfig,
       series: [{
-        name: 'Total',
-        data: assetData.map(item => item.total)
+        name: 'Kas Masuk',
+        data: Object.values(cashInDataYearly)
       }],
       xaxis: {
-        ...barChartConfig.xaxis,
-        categories: assetData.map(item => item.name)
-      }
-    });
-
-    renderChart("#cashInCategoryChart", {
-      ...categoryBarConfig,
-      series: [{
-        name: 'Total',
-        data: Object.values(cashInCategoryData)
-      }],
-      xaxis: {
-        ...categoryBarConfig.xaxis,
-        categories: Object.keys(cashInCategoryData)
+        ...monthlyBarConfig.xaxis,
+        categories: Object.keys(cashInDataYearly).map(formatMonth)
       },
       colors: ['#00E396']
     });
 
-    renderChart("#cashOutCategoryChart", {
-      ...categoryBarConfig,
+    renderChart("#cashOutChartYear", {
+      ...monthlyBarConfig,
       series: [{
-        name: 'Total',
-        data: Object.values(cashOutCategoryData)
+        name: 'Kas Keluar',
+        data: Object.values(cashOutDataYearly)
       }],
       xaxis: {
-        ...categoryBarConfig.xaxis,
-        categories: Object.keys(cashOutCategoryData)
+        ...monthlyBarConfig.xaxis,
+        categories: Object.keys(cashOutDataYearly).map(formatMonth)
       },
-      colors: ['#FF4560']
+      colors: ['#ff4560']
     });
+
+    renderChart('#lastMonthChart', lastMonthChartConfig)
   </script>
 @endsection

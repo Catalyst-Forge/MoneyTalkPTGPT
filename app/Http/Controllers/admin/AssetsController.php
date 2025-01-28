@@ -111,17 +111,28 @@ class AssetsController extends Controller
         return redirect()->route('asset.index')->with('success', 'Asset deleted successfully');
     }
 
-    public function exportExcel()
+    public function exportExcel(Request $request)
     {
-        return Excel::download(new AssetsExport(), 'data_asset.xlsx');
+        $selectedMonth = $request->input('month');
+        
+        return Excel::download(new AssetsExport($selectedMonth), 'Asset_Data_' . \Carbon\Carbon::parse($selectedMonth)->translatedFormat('F_Y') . '.xlsx');
     }
 
-    public function exportPDF()
+    public function exportPDF(Request $request)
     {
-        $assets = Assets::all();
+        $month = $request->input('month');
+
+        if ($month) {
+            $assets = Assets::whereMonth('date', '=', \Carbon\Carbon::parse($month)->month)
+                ->whereYear('date', '=', \Carbon\Carbon::parse($month)->year)
+                ->get();
+        }
+
+        $formattedMonthRaw = \Carbon\Carbon::parse($month)->translatedFormat('F_Y');
+        $formattedMonth = \Carbon\Carbon::parse($month)->locale('id')->translatedFormat('F Y');
         $expenditure = $assets->sum('value');
-        $pdf = Pdf::loadView('admin.assets.pdf', compact('assets', 'expenditure'));
-        return $pdf->download('laporan_asset.pdf');
+        $pdf = Pdf::loadView('admin.assets.pdf', compact('assets', 'expenditure', 'formattedMonth'));
+        return $pdf->download('Asset_Report_' . $formattedMonthRaw . '.pdf');
     }
 
     public function monthlyReport(Request $request)
@@ -143,7 +154,7 @@ class AssetsController extends Controller
         return view('admin.assets.monthly_report', compact('assets', 'month', 'totalAmount'));
     }
 
-    public function diagram() {
-        
+    public function diagram()
+    {
     }
 }
