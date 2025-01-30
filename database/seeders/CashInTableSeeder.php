@@ -3,10 +3,8 @@
 namespace Database\Seeders;
 
 use App\Models\Cash;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Carbon\Carbon;
-use Faker\Factory as Faker;
 
 class CashInTableSeeder extends Seeder
 {
@@ -15,23 +13,49 @@ class CashInTableSeeder extends Seeder
      */
     public function run(): void
     {
-        $faker = Faker::create();
+        // Initial balance transaction
+        Cash::create([
+            'date' => '2024-01-01',  // Setting start of year for initial balance
+            'description' => 'Saldo Awal',
+            'category_id' => 1,  // Adjust category_id as per your categories table
+            'notes' => 'Saldo awal tahun 2024',
+            'amount' => 2344834,
+        ]);
 
-        $startDate = Carbon::now()->subYears(3);
-        $endDate = Carbon::now();
+        // January 2024 transactions
+        $transactions = [
+            [
+                'date' => '2024-01-08',
+                'description' => 'KAS',
+                'category_id' => 1,
+                'notes' => 'Pemasukan kas minggu pertama',
+                'amount' => 3000000,
+            ],
+            [
+                'date' => '2024-01-13',
+                'description' => 'KAS',
+                'category_id' => 1,
+                'notes' => 'Pemasukan kas minggu kedua',
+                'amount' => 3000000,
+            ],
+            [
+                'date' => '2024-01-20',
+                'description' => 'KAS',
+                'category_id' => 1,
+                'notes' => 'Pemasukan kas minggu ketiga',
+                'amount' => 3000000,
+            ],
+            [
+                'date' => '2024-01-29',
+                'description' => 'KAS',
+                'category_id' => 1,
+                'notes' => 'Pemasukan kas minggu keempat',
+                'amount' => 3000000,
+            ],
+        ];
 
-        // Sample Cash In
-        $cashInDescriptions = ['Pendapatan Penjualan', 'Pendapatan Jasa', 'Bunga Bank', 'Pendapatan Sewa', 'Komisi Penjualan', 'Pendapatan Investasi', 'Penjualan Aset', 'Lain-lainnya'];
-
-        for ($i = 0; $i < 50; $i++) {
-            $date = Carbon::parse($startDate)->addDays(rand(0, $endDate->diffInDays($startDate)));
-            Cash::create([
-                'date' => $date,
-                'description' => $faker->randomElement($cashInDescriptions),
-                'category_id' => rand(1, 2),
-                'notes' => $faker->sentence(),
-                'amount' => $faker->randomFloat(2, 1000000, 50000000),
-            ]);
+        foreach ($transactions as $transaction) {
+            Cash::create($transaction);
         }
     }
 }
