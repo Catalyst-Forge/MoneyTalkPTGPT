@@ -38,9 +38,9 @@
         <label for="monthFilter" class="me-2">Pilih Bulan:</label>
         <select id="monthFilter" class="form-select" style="width: auto;">
           @foreach ($availableMonth as $month)
-            <option value="{{ $month }}" {{ $month == $selectedMonthYear ? 'selected' : '' }}>
-              {{ \Carbon\Carbon::createFromFormat('Y-m', $month)->translatedFormat('F Y') }}
-            </option>
+              <option value="{{ $month }}" {{ $month == $selectedMonthYear ? 'selected' : '' }}>
+                {{ \Carbon\Carbon::parse($month)->translatedFormat('F Y') }}
+              </option>
           @endforeach
         </select>
       </div>
@@ -115,6 +115,11 @@
         } :
         format === 'year' ? {
           year: 'numeric'
+        } : 
+        format === 'full' ? {
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric'
         } : {
           month: 'long',
           year: 'numeric'
@@ -157,7 +162,7 @@
         labels: {
           rotate: -45,
           style: {
-            fontSize: '12px'
+            fontSize: '14px'
           }
         }
       },
@@ -219,6 +224,7 @@
         }
       }
     };
+
     // Konfigurasi umum untuk monthly bar chart
     const monthlyBarConfig = {
       ...barChartConfig,
@@ -268,7 +274,7 @@
       }],
       xaxis: {
         ...monthlyBarConfig.xaxis,
-        categories: Object.keys(cashInDataMonthly).map(formatMonth)
+        categories: Object.keys(cashInDataMonthly).map(date => formatMonth(date, 'full'))
       },
       colors: ['#00E396']
     })
@@ -281,7 +287,7 @@
       }],
       xaxis: {
         ...monthlyBarConfig.xaxis,
-        categories: Object.keys(cashOutDataMonthly).map(formatMonth)
+        categories: Object.keys(cashOutDataMonthly).map(month => formatMonth(month, 'full'))
       },
       colors: ['#FF4560']
     });

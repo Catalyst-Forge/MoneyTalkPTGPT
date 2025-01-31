@@ -11,15 +11,17 @@ class AdminController extends Controller
 {
     public function index()
     {
-        function getCashData($model, $selectedYear, $selectedMonth = null)
+        function getCashData($model, $selectedYear, $selectedMonth = null, $format = 'Y-m')
         {
-            $query = $model::selectRaw('DATE_FORMAT(date, "%Y-%m") as month, SUM(amount) as total')->whereYear('date', $selectedYear)->groupBy('month')->orderBy('month');
+            $dateFormat = $format === 'Y-m-d' ? 'DATE_FORMAT(date, "%Y-%m-%d")' : 'DATE_FORMAT(date, "%Y-%m")';
+            
+            $query = $model::selectRaw("$dateFormat as date, SUM(amount) as total")->whereYear('date', $selectedYear)->groupBy('date')->orderBy('date');
 
             if ($selectedMonth) {
                 $query->whereMonth('date', $selectedMonth);
             }
 
-            return $query->pluck('total', 'month')->toArray();
+            return $query->pluck('total', 'date')->toArray();
         }
 
         // Total kas masuk, keluar, dan saldo
@@ -46,10 +48,11 @@ class AdminController extends Controller
             ->whereMonth('date', $lastMonth->month)
             ->sum('amount');
 
-        // Data kas masuk dan keluar (dengan fungsi dinamis)
-        $cashInDataMonthly = getCashData(Cash::class, $selectedYear, $selectedMonth);
+        // Data kas masuk dan keluar perbulan (dengan fungsi dinamis)
+        $cashInDataMonthly = getCashData(Cash::class, $selectedYear, $selectedMonth, 'Y-m-d');
         $cashOutDataMonthly = getCashData(CashOut::class, $selectedYear, $selectedMonth);
 
+        // Data kas masuk dan keluar pertahun (dengan fungsi dinamis)
         $cashInDataYearly = getCashData(Cash::class, $selectedYear);
         $cashOutDataYearly = getCashData(CashOut::class, $selectedYear);
 
