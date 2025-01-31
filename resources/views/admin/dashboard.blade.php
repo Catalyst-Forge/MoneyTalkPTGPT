@@ -37,6 +37,7 @@
       <div class="d-flex align-items-center">
         <label for="monthFilter" class="me-2">Pilih Bulan:</label>
         <select id="monthFilter" class="form-select" style="width: auto;">
+          <option value="" disabled selected>&minus;</option>
           @foreach ($availableMonth as $month)
               <option value="{{ $month }}" {{ $month == $selectedMonthYear ? 'selected' : '' }}>
                 {{ \Carbon\Carbon::parse($month)->translatedFormat('F Y') }}
