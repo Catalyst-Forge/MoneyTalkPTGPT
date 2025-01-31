@@ -73,6 +73,7 @@
       width: 100%;
       border-collapse: collapse;
       margin-top: 20px;
+      table-layout: fixed;
       background-color: white;
       border-radius: 4px;
       overflow: hidden;
